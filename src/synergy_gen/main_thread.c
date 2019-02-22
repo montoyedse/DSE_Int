@@ -4,68 +4,74 @@
 TX_THREAD main_thread;
 void main_thread_create(void);
 static void main_thread_func(ULONG thread_input);
-/** Alignment requires using pragma for IAR. GCC is done through attribute. */
-#if defined(__ICCARM__)
-#pragma data_alignment = BSP_STACK_ALIGNMENT
+static uint8_t main_thread_stack[2048] BSP_PLACE_IN_SECTION_V2(".stack.main_thread") BSP_ALIGN_VARIABLE_V2(BSP_STACK_ALIGNMENT);
+void tx_startup_err_callback(void *p_instance, void *p_data);
+void tx_startup_common_init(void);
+#if !defined(SSP_SUPPRESS_ISR_g_spi_lcdc) && !defined(SSP_SUPPRESS_ISR_SCI0)
+SSP_VECTOR_DEFINE_CHAN(sci_spi_rxi_isr, SCI, RXI, 0);
 #endif
-static uint8_t main_thread_stack[2048] BSP_PLACE_IN_SECTION(".stack.main_thread") BSP_ALIGN_VARIABLE(BSP_STACK_ALIGNMENT);
-#if (BSP_IRQ_DISABLED) != BSP_IRQ_DISABLED
-#if !defined(SSP_SUPPRESS_ISR_g_adc0) && !defined(SSP_SUPPRESS_ISR_ADC0)
-SSP_VECTOR_DEFINE_CHAN(adc_scan_end_isr, ADC, SCAN_END, 0);
+#if !defined(SSP_SUPPRESS_ISR_g_spi_lcdc) && !defined(SSP_SUPPRESS_ISR_SCI0)
+SSP_VECTOR_DEFINE_CHAN(sci_spi_txi_isr, SCI, TXI, 0);
 #endif
+#if !defined(SSP_SUPPRESS_ISR_g_spi_lcdc) && !defined(SSP_SUPPRESS_ISR_SCI0)
+SSP_VECTOR_DEFINE_CHAN(sci_spi_tei_isr, SCI, TEI, 0);
 #endif
-#if (BSP_IRQ_DISABLED) != BSP_IRQ_DISABLED
-#if !defined(SSP_SUPPRESS_ISR_g_adc0) && !defined(SSP_SUPPRESS_ISR_ADC0)
-SSP_VECTOR_DEFINE_CHAN(adc_scan_end_b_isr, ADC, SCAN_END_B, 0);
+#if !defined(SSP_SUPPRESS_ISR_g_spi_lcdc) && !defined(SSP_SUPPRESS_ISR_SCI0)
+SSP_VECTOR_DEFINE_CHAN(sci_spi_eri_isr, SCI, ERI, 0);
 #endif
+sci_spi_instance_ctrl_t g_spi_lcdc_ctrl;
+
+/** SPI extended configuration */
+const sci_spi_extended_cfg g_spi_lcdc_cfg_extend =
+{ .bitrate_modulation = true };
+
+const spi_cfg_t g_spi_lcdc_cfg =
+{ .channel = 0, .operating_mode = SPI_MODE_MASTER, .clk_phase = SPI_CLK_PHASE_EDGE_EVEN, .clk_polarity =
+          SPI_CLK_POLARITY_HIGH,
+  .mode_fault = SPI_MODE_FAULT_ERROR_DISABLE, .bit_order = SPI_BIT_ORDER_MSB_FIRST, .bitrate = 100000,
+#define SYNERGY_NOT_DEFINED (1)             
+#if (SYNERGY_NOT_DEFINED == SYNERGY_NOT_DEFINED)
+  .p_transfer_tx = NULL,
+#else
+  .p_transfer_tx = &SYNERGY_NOT_DEFINED,
 #endif
-adc_instance_ctrl_t g_adc0_ctrl;
-const adc_cfg_t g_adc0_cfg =
-{ .unit = 0, .mode = ADC_MODE_CONTINUOUS_SCAN, .resolution = ADC_RESOLUTION_12_BIT, .alignment = ADC_ALIGNMENT_RIGHT,
-  .add_average_count = ADC_ADD_OFF, .clearing = ADC_CLEAR_AFTER_READ_ON, .trigger = ADC_TRIGGER_SOFTWARE,
-  .trigger_group_b = ADC_TRIGGER_SYNC_ELC, .p_callback = NULL, .p_context = &g_adc0, .scan_end_ipl = (BSP_IRQ_DISABLED),
-  .scan_end_b_ipl = (BSP_IRQ_DISABLED), };
-const adc_channel_cfg_t g_adc0_channel_cfg =
-{ .scan_mask = (uint32_t) (
-        ((uint64_t) ADC_MASK_CHANNEL_0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0)
-                | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0)
-                | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0)
-                | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0)
-                | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0)
-                | (0)),
-  /** Group B channel mask is right shifted by 32 at the end to form the proper mask */
-  .scan_mask_group_b = (uint32_t) (
-          (((uint64_t) ADC_MASK_CHANNEL_0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0)
-                  | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0)
-                  | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0)
-                  | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0)
-                  | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0) | ((uint64_t) 0)
-                  | (0)) >> 32),
-  .priority_group_a = ADC_GROUP_A_PRIORITY_OFF, .add_mask = (uint32_t) (
-          (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0)
-                  | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0) | (0)),
-  .sample_hold_mask = (uint32_t) ((0) | (0) | (0)), .sample_hold_states = 24, };
+#if (SYNERGY_NOT_DEFINED == SYNERGY_NOT_DEFINED)
+  .p_transfer_rx = NULL,
+#else
+  .p_transfer_rx = &SYNERGY_NOT_DEFINED,
+#endif
+#undef SYNERGY_NOT_DEFINED	
+  .p_callback = g_lcd_spi_callback,
+  .p_context = (void *) &g_spi_lcdc, .rxi_ipl = (3), .txi_ipl = (3), .tei_ipl = (3), .eri_ipl = (3), .p_extend =
+          &g_spi_lcdc_cfg_extend, };
 /* Instance structure to use this module. */
-const adc_instance_t g_adc0 =
-{ .p_ctrl = &g_adc0_ctrl, .p_cfg = &g_adc0_cfg, .p_channel_cfg = &g_adc0_channel_cfg, .p_api = &g_adc_on_adc };
+const spi_instance_t g_spi_lcdc =
+{ .p_ctrl = &g_spi_lcdc_ctrl, .p_cfg = &g_spi_lcdc_cfg, .p_api = &g_spi_on_sci };
 #if (3) != BSP_IRQ_DISABLED
-#if !defined(SSP_SUPPRESS_ISR_g_external_irq) && !defined(SSP_SUPPRESS_ISR_ICU9)
+#if !defined(SSP_SUPPRESS_ISR_g_touch_irq) && !defined(SSP_SUPPRESS_ISR_ICU9)
 SSP_VECTOR_DEFINE( icu_irq_isr, ICU, IRQ9);
 #endif
 #endif
-static icu_instance_ctrl_t g_external_irq_ctrl;
-static const external_irq_cfg_t g_external_irq_cfg =
-{ .channel = 9, .trigger = EXTERNAL_IRQ_TRIG_FALLING, .filter_enable = true, .pclk_div = EXTERNAL_IRQ_PCLK_DIV_BY_64,
-  .autostart = true, .p_callback = NULL, .p_context = &g_external_irq, .p_extend = NULL, .irq_ipl = (3), };
+static icu_instance_ctrl_t g_touch_irq_ctrl;
+static const external_irq_cfg_t g_touch_irq_cfg =
+{ .channel = 9,
+  .trigger = EXTERNAL_IRQ_TRIG_FALLING,
+  .filter_enable = true,
+  .pclk_div = EXTERNAL_IRQ_PCLK_DIV_BY_64,
+  .autostart = true,
+  .p_callback = NULL,
+  .p_context = &g_touch_irq,
+  .p_extend = NULL,
+  .irq_ipl = (3), };
 /* Instance structure to use this module. */
-const external_irq_instance_t g_external_irq =
-{ .p_ctrl = &g_external_irq_ctrl, .p_cfg = &g_external_irq_cfg, .p_api = &g_external_irq_on_icu };
-sf_external_irq_instance_ctrl_t g_sf_touch_irq_ctrl;
-const sf_external_irq_cfg_t g_sf_touch_irq_cfg =
-{ .event = SF_EXTERNAL_IRQ_EVENT_SEMAPHORE_PUT, .p_lower_lvl_irq = &g_external_irq, };
+const external_irq_instance_t g_touch_irq =
+{ .p_ctrl = &g_touch_irq_ctrl, .p_cfg = &g_touch_irq_cfg, .p_api = &g_external_irq_on_icu };
+sf_external_irq_instance_ctrl_t g_sf_external_irq_ctrl;
+const sf_external_irq_cfg_t g_sf_external_irq_cfg =
+{ .event = SF_EXTERNAL_IRQ_EVENT_SEMAPHORE_PUT, .p_lower_lvl_irq = &g_touch_irq, };
 /* Instance structure to use this module. */
-const sf_external_irq_instance_t g_sf_touch_irq =
-{ .p_ctrl = &g_sf_touch_irq_ctrl, .p_cfg = &g_sf_touch_irq_cfg, .p_api = &g_sf_external_irq_on_sf_external_irq };
+const sf_external_irq_instance_t g_sf_external_irq =
+{ .p_ctrl = &g_sf_external_irq_ctrl, .p_cfg = &g_sf_external_irq_cfg, .p_api = &g_sf_external_irq_on_sf_external_irq };
 #if (BSP_IRQ_DISABLED) != BSP_IRQ_DISABLED
 #if !defined(SSP_SUPPRESS_ISR_g_transfer1) && !defined(SSP_SUPPRESS_ISR_DTCELC_EVENT_IIC2_RXI)
 #define DTC_ACTIVATION_SRC_ELC_EVENT_IIC2_RXI
@@ -82,13 +88,24 @@ SSP_VECTOR_DEFINE(elc_software_event_isr, ELC, SOFTWARE_EVENT_1);
 
 dtc_instance_ctrl_t g_transfer1_ctrl;
 transfer_info_t g_transfer1_info =
-{ .dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED, .repeat_area = TRANSFER_REPEAT_AREA_DESTINATION, .irq =
-          TRANSFER_IRQ_END,
-  .chain_mode = TRANSFER_CHAIN_MODE_DISABLED, .src_addr_mode = TRANSFER_ADDR_MODE_FIXED, .size = TRANSFER_SIZE_1_BYTE,
-  .mode = TRANSFER_MODE_NORMAL, .p_dest = (void *) NULL, .p_src = (void const *) NULL, .num_blocks = 0, .length = 0, };
+{ .dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+  .repeat_area = TRANSFER_REPEAT_AREA_DESTINATION,
+  .irq = TRANSFER_IRQ_END,
+  .chain_mode = TRANSFER_CHAIN_MODE_DISABLED,
+  .src_addr_mode = TRANSFER_ADDR_MODE_FIXED,
+  .size = TRANSFER_SIZE_1_BYTE,
+  .mode = TRANSFER_MODE_NORMAL,
+  .p_dest = (void *) NULL,
+  .p_src = (void const *) NULL,
+  .num_blocks = 0,
+  .length = 0, };
 const transfer_cfg_t g_transfer1_cfg =
-{ .p_info = &g_transfer1_info, .activation_source = ELC_EVENT_IIC2_RXI, .auto_enable = false, .p_callback = NULL,
-  .p_context = &g_transfer1, .irq_ipl = (BSP_IRQ_DISABLED) };
+{ .p_info = &g_transfer1_info,
+  .activation_source = ELC_EVENT_IIC2_RXI,
+  .auto_enable = false,
+  .p_callback = NULL,
+  .p_context = &g_transfer1,
+  .irq_ipl = (BSP_IRQ_DISABLED) };
 /* Instance structure to use this module. */
 const transfer_instance_t g_transfer1 =
 { .p_ctrl = &g_transfer1_ctrl, .p_cfg = &g_transfer1_cfg, .p_api = &g_transfer_on_dtc };
@@ -108,13 +125,24 @@ SSP_VECTOR_DEFINE(elc_software_event_isr, ELC, SOFTWARE_EVENT_1);
 
 dtc_instance_ctrl_t g_transfer0_ctrl;
 transfer_info_t g_transfer0_info =
-{ .dest_addr_mode = TRANSFER_ADDR_MODE_FIXED, .repeat_area = TRANSFER_REPEAT_AREA_SOURCE, .irq = TRANSFER_IRQ_END,
-  .chain_mode = TRANSFER_CHAIN_MODE_DISABLED, .src_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED, .size =
-          TRANSFER_SIZE_1_BYTE,
-  .mode = TRANSFER_MODE_NORMAL, .p_dest = (void *) NULL, .p_src = (void const *) NULL, .num_blocks = 0, .length = 0, };
+{ .dest_addr_mode = TRANSFER_ADDR_MODE_FIXED,
+  .repeat_area = TRANSFER_REPEAT_AREA_SOURCE,
+  .irq = TRANSFER_IRQ_END,
+  .chain_mode = TRANSFER_CHAIN_MODE_DISABLED,
+  .src_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
+  .size = TRANSFER_SIZE_1_BYTE,
+  .mode = TRANSFER_MODE_NORMAL,
+  .p_dest = (void *) NULL,
+  .p_src = (void const *) NULL,
+  .num_blocks = 0,
+  .length = 0, };
 const transfer_cfg_t g_transfer0_cfg =
-{ .p_info = &g_transfer0_info, .activation_source = ELC_EVENT_IIC2_TXI, .auto_enable = false, .p_callback = NULL,
-  .p_context = &g_transfer0, .irq_ipl = (BSP_IRQ_DISABLED) };
+{ .p_info = &g_transfer0_info,
+  .activation_source = ELC_EVENT_IIC2_TXI,
+  .auto_enable = false,
+  .p_callback = NULL,
+  .p_context = &g_transfer0,
+  .irq_ipl = (BSP_IRQ_DISABLED) };
 /* Instance structure to use this module. */
 const transfer_instance_t g_transfer0 =
 { .p_ctrl = &g_transfer0_ctrl, .p_cfg = &g_transfer0_cfg, .p_api = &g_transfer_on_dtc };
@@ -160,7 +188,7 @@ void g_sf_touch_panel_i2c_err_callback(void *p_instance, void *p_data)
 g_sf_touch_panel_i2c_err_callback_WEAK_ATTRIBUTE;
 sf_touch_panel_i2c_instance_ctrl_t g_sf_touch_panel_i2c_ctrl;
 const sf_touch_panel_i2c_cfg_t g_sf_touch_panel_i2c_cfg_extend =
-{ .p_lower_lvl_i2c = &g_i2c, .p_lower_lvl_irq = &g_sf_touch_irq, .pin = IOPORT_PORT_06_PIN_09, .p_chip =
+{ .p_lower_lvl_i2c = &g_i2c, .p_lower_lvl_irq = &g_sf_external_irq, .pin = IOPORT_PORT_06_PIN_09, .p_chip =
           &g_sf_touch_panel_i2c_chip_sx8654, };
 const sf_touch_panel_cfg_t g_sf_touch_panel_i2c_cfg =
 { .hsize_pixels = 240, .vsize_pixels = 320, .priority = 3, .update_hz = 10, .p_message = &g_sf_message0, .p_extend =
@@ -202,51 +230,10 @@ void sf_touch_panel_i2c_init0(void)
         g_sf_touch_panel_i2c_err_callback ((void *) &g_sf_touch_panel_i2c, &ssp_err_g_sf_touch_panel_i2c);
     }
 }
-#if !defined(SSP_SUPPRESS_ISR_g_spi_lcdc) && !defined(SSP_SUPPRESS_ISR_SCI0)
-SSP_VECTOR_DEFINE_CHAN(sci_spi_txi_rxi_tei_isr, SCI, RXI, 0);
-#endif
-#if !defined(SSP_SUPPRESS_ISR_g_spi_lcdc) && !defined(SSP_SUPPRESS_ISR_SCI0)
-SSP_VECTOR_DEFINE_CHAN(sci_spi_txi_rxi_tei_isr, SCI, TXI, 0);
-#endif
-#if !defined(SSP_SUPPRESS_ISR_g_spi_lcdc) && !defined(SSP_SUPPRESS_ISR_SCI0)
-SSP_VECTOR_DEFINE_CHAN(sci_spi_txi_rxi_tei_isr, SCI, TEI, 0);
-#endif
-#if !defined(SSP_SUPPRESS_ISR_g_spi_lcdc) && !defined(SSP_SUPPRESS_ISR_SCI0)
-SSP_VECTOR_DEFINE_CHAN(sci_spi_eri_isr, SCI, ERI, 0);
-#endif
-sci_spi_instance_ctrl_t g_spi_lcdc_ctrl;
-
-/** SPI extended configuration */
-const sci_spi_extended_cfg g_spi_lcdc_cfg_extend =
-{ .bitrate_modulation = true };
-
-const spi_cfg_t g_spi_lcdc_cfg =
-{ .channel = 0, .operating_mode = SPI_MODE_MASTER, .clk_phase = SPI_CLK_PHASE_EDGE_EVEN, .clk_polarity =
-          SPI_CLK_POLARITY_HIGH,
-  .mode_fault = SPI_MODE_FAULT_ERROR_DISABLE, .bit_order = SPI_BIT_ORDER_MSB_FIRST, .bitrate = 100000,
-#define SYNERGY_NOT_DEFINED (1)             
-#if (SYNERGY_NOT_DEFINED == SYNERGY_NOT_DEFINED)
-  .p_transfer_tx = NULL,
-#else
-  .p_transfer_tx = &SYNERGY_NOT_DEFINED,
-#endif
-#if (SYNERGY_NOT_DEFINED == SYNERGY_NOT_DEFINED)
-  .p_transfer_rx = NULL,
-#else
-  .p_transfer_rx = &SYNERGY_NOT_DEFINED,
-#endif
-#undef SYNERGY_NOT_DEFINED	
-  .p_callback = g_lcd_spi_callback,
-  .p_context = (void *) &g_spi_lcdc, .rxi_ipl = (3), .txi_ipl = (3), .tei_ipl = (3), .eri_ipl = (3), .p_extend =
-          &g_spi_lcdc_cfg_extend, };
-/* Instance structure to use this module. */
-const spi_instance_t g_spi_lcdc =
-{ .p_ctrl = &g_spi_lcdc_ctrl, .p_cfg = &g_spi_lcdc_cfg, .p_api = &g_spi_on_sci };
 TX_SEMAPHORE g_main_semaphore_lcdc;
 extern bool g_ssp_common_initialized;
 extern uint32_t g_ssp_common_thread_count;
 extern TX_SEMAPHORE g_ssp_common_initialized_semaphore;
-void g_hal_init(void);
 
 void main_thread_create(void)
 {
@@ -254,10 +241,20 @@ void main_thread_create(void)
     g_ssp_common_thread_count++;
 
     /* Initialize each kernel object. */
-    tx_semaphore_create (&g_main_semaphore_lcdc, (CHAR *) "New Semaphore", 0);
+    UINT err_g_main_semaphore_lcdc;
+    err_g_main_semaphore_lcdc = tx_semaphore_create (&g_main_semaphore_lcdc, (CHAR *) "Main Semaphore", 0);
+    if (TX_SUCCESS != err_g_main_semaphore_lcdc)
+    {
+        tx_startup_err_callback (&g_main_semaphore_lcdc, 0);
+    }
 
-    tx_thread_create (&main_thread, (CHAR *) "Main Thread", main_thread_func, (ULONG) NULL, &main_thread_stack, 2048, 6,
-                      6, 10, TX_AUTO_START);
+    UINT err;
+    err = tx_thread_create (&main_thread, (CHAR *) "Main Thread", main_thread_func, (ULONG) NULL, &main_thread_stack,
+                            2048, 6, 6, 10, TX_AUTO_START);
+    if (TX_SUCCESS != err)
+    {
+        tx_startup_err_callback (&main_thread, 0);
+    }
 }
 
 static void main_thread_func(ULONG thread_input)
@@ -265,41 +262,8 @@ static void main_thread_func(ULONG thread_input)
     /* Not currently using thread_input. */
     SSP_PARAMETER_NOT_USED (thread_input);
 
-    /* First thread will take care of common initialization. */
-    UINT err;
-    err = tx_semaphore_get (&g_ssp_common_initialized_semaphore, TX_WAIT_FOREVER);
-
-    while (TX_SUCCESS != err)
-    {
-        /* Check err, problem occurred. */
-        BSP_CFG_HANDLE_UNRECOVERABLE_ERROR (0);
-    }
-
-    /* Only perform common initialization if this is the first thread to execute. */
-    if (false == g_ssp_common_initialized)
-    {
-        /* Later threads will not run this code. */
-        g_ssp_common_initialized = true;
-
-        /* Perform common module initialization. */
-        g_hal_init ();
-
-        /* Now that common initialization is done, let other threads through. */
-        /* First decrement by 1 since 1 thread has already come through. */
-        g_ssp_common_thread_count--;
-        while (g_ssp_common_thread_count > 0)
-        {
-            err = tx_semaphore_put (&g_ssp_common_initialized_semaphore);
-
-            while (TX_SUCCESS != err)
-            {
-                /* Check err, problem occurred. */
-                BSP_CFG_HANDLE_UNRECOVERABLE_ERROR (0);
-            }
-
-            g_ssp_common_thread_count--;
-        }
-    }
+    /* Initialize common components */
+    tx_startup_common_init ();
 
     /* Initialize each module instance. */
     /** Call initialization function if user has selected to do so. */

@@ -3,31 +3,27 @@
 #define COMMON_DATA_H_
 #include <stdint.h>
 #include "bsp_api.h"
-#include "sf_message.h"
-#include "sf_message_payloads.h"
+
 #include "r_jpeg_decode.h"
 #include "sf_jpeg_decode.h"
 #include "r_glcd.h"
 #include "r_display_api.h"
 #include "sf_el_gx.h"
-#include "r_ioport.h"
-#include "r_ioport_api.h"
+#include "sf_message.h"
+#include "sf_message_payloads.h"
 #include "r_fmi.h"
 #include "r_fmi_api.h"
 #include "r_elc.h"
 #include "r_elc_api.h"
 #include "r_cgc.h"
 #include "r_cgc_api.h"
+#include "r_ioport.h"
+#include "r_ioport_api.h"
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-extern void g_message_init(void);
 
-/* SF Message on SF Message Instance. */
-extern const sf_message_instance_t g_sf_message0;
-void g_sf_message0_err_callback(void *p_instance, void *p_data);
-void sf_message_init0(void);
 extern const jpeg_decode_instance_t g_jpeg_decode0;
 extern const jpeg_decode_cfg_t g_jpeg_decode0_cfg;
 #ifndef NULL
@@ -78,14 +74,20 @@ extern uint8_t g_display_fb_foreground[2][((800 * 480) * DISPLAY_BITS_PER_PIXEL_
 extern void NULL(sf_el_gx_callback_args_t *p_arg);
 #endif
 extern sf_el_gx_instance_t g_sf_el_gx;
-/** IOPORT Instance */
-extern const ioport_instance_t g_ioport;
+extern void g_message_init(void);
+
+/* SF Message on SF Message Instance. */
+extern const sf_message_instance_t g_sf_message0;
+void g_sf_message0_err_callback(void *p_instance, void *p_data);
+void sf_message_init0(void);
 /** FMI on FMI Instance. */
 extern const fmi_instance_t g_fmi;
 /** ELC Instance */
 extern const elc_instance_t g_elc;
 /** CGC Instance */
 extern const cgc_instance_t g_cgc;
+/** IOPORT Instance */
+extern const ioport_instance_t g_ioport;
 void g_common_init(void);
 #ifdef __cplusplus
 } /* extern "C" */
