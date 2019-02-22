@@ -6,17 +6,16 @@
 #include "gui/guiapp_specifications.h"
 #include "gui/guiapp_resources.h"
 
+
 #if defined(BSP_BOARD_S7G2_SK)
 #include "hardware/lcd.h"
 #endif
 
-
+#define HALL_SENSOR_EVENT   (GX_FIRST_APP_EVENT + 1)
 
 /***********************************************************************************************************************
     Private function prototypes
  ***********************************************************************************************************************/
-//static bool ssp_touch_to_guix(sf_touch_panel_payload_t * p_touch_payload, GX_EVENT * g_gx_event);
-
 void main_thread_entry(void);
 static bool ssp_touch_to_guix(sf_touch_panel_payload_t * p_touch_payload, GX_EVENT * g_gx_event);
 
@@ -24,12 +23,13 @@ static bool ssp_touch_to_guix(sf_touch_panel_payload_t * p_touch_payload, GX_EVE
 void g_lcd_spi_callback(spi_callback_args_t * p_args);
 #endif
 
+
 /***********************************************************************************************************************
     Private global variables
  ***********************************************************************************************************************/
 static GX_EVENT g_gx_event;
-
 GX_WINDOW_ROOT * p_window_root;
+
 
 /***********************************************************************************************************************
     User generated variables
@@ -40,9 +40,6 @@ GX_CONST GX_CHAR *programmer1 = "De Jesus, Lloen";
 GX_CONST GX_CHAR *programmer2 = "Alvarado, Jorge";
 GX_CONST GX_CHAR *programmer3 = "Montoya, Edgar";
 GX_CONST GX_CHAR *nombre_proyecto = "Control Vel. Motor DC";
-
-UINT status_dc = TX_SUCCESS;
-UINT status_sv = TX_SUCCESS;
 
 
 /*******************************************************************************************************************//**
@@ -144,10 +141,6 @@ void main_thread_entry(void) {
     }
 #endif
 
-    g_adc0.p_api->open(g_adc0.p_ctrl, g_adc0.p_cfg);
-    g_adc0.p_api->scanCfg(g_adc0.p_ctrl, g_adc0.p_channel_cfg);
-    g_adc0.p_api->scanStart(g_adc0.p_ctrl);
-
 	while(1)
 	{
 	    bool new_gui_event = false;
@@ -194,6 +187,7 @@ void main_thread_entry(void) {
 	}
 }
 
+
 static bool ssp_touch_to_guix(sf_touch_panel_payload_t * p_touch_payload, GX_EVENT * gx_event)
 {
     bool send_event = true;
@@ -235,6 +229,7 @@ static bool ssp_touch_to_guix(sf_touch_panel_payload_t * p_touch_payload, GX_EVE
 
     return send_event;
 }
+
 
 void g_lcd_spi_callback (spi_callback_args_t * p_args)
 {
