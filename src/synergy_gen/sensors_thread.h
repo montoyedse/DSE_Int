@@ -9,15 +9,20 @@ extern "C" void sensors_thread_entry(void);
 #else 
 extern void sensors_thread_entry(void);
 #endif
-#include "r_icu.h"
-#include "r_external_irq_api.h"
 #include "r_gpt.h"
 #include "r_timer_api.h"
+#include "r_icu.h"
+#include "r_external_irq_api.h"
 #include "r_adc.h"
 #include "r_adc_api.h"
 #ifdef __cplusplus
 extern "C"
 {
+#endif
+/** Timer on GPT Instance. */
+extern const timer_instance_t g_timer0;
+#ifndef g_timer0_interrupt
+void g_timer0_interrupt(timer_callback_args_t *p_args);
 #endif
 /* External IRQ on ICU Instance. */
 extern const external_irq_instance_t g_external_irq5;
