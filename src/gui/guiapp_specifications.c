@@ -6,7 +6,7 @@
 /*  www.expresslogic.com.                                                      */
 /*                                                                             */
 /*  GUIX Studio Revision 5.4.1.1                                               */
-/*  Date (dd.mm.yyyy):  8. 2.2019   Time (hh:mm): 12:09                        */
+/*  Date (dd.mm.yyyy):  9. 2.2019   Time (hh:mm): 09:35                        */
 /*******************************************************************************/
 
 
@@ -110,84 +110,84 @@ GX_PROMPT_PROPERTIES window1_programmer1_properties =
     0,                                       /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 GX_PROMPT_PROPERTIES window1_programmer2_properties =
 {
     0,                                       /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 GX_PROMPT_PROPERTIES window1_programmer3_properties =
 {
     0,                                       /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 GX_PROMPT_PROPERTIES window1_percentage_properties =
 {
     GX_STRING_ID_PERCENTAGE,                 /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 GX_PROMPT_PROPERTIES window1_duty_value_properties =
 {
     GX_STRING_ID_STRING_2,                   /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 GX_PROMPT_PROPERTIES window1_speed_value_properties =
 {
     GX_STRING_ID_STRING_2,                   /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 GX_PROMPT_PROPERTIES window1_sw_ver_value_properties =
 {
     0,                                       /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 GX_PROMPT_PROPERTIES window1_hw_ver_value_properties =
 {
     0,                                       /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 GX_PROMPT_PROPERTIES window1_rpm_properties =
 {
     GX_STRING_ID_RPM,                        /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 GX_PROMPT_PROPERTIES window1_setpoint_properties =
 {
     GX_STRING_ID_SETPOINT,                   /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 GX_PROMPT_PROPERTIES window1_rpm2_properties =
 {
     GX_STRING_ID_RPM,                        /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 GX_PROMPT_PROPERTIES window1_setpoint_value_properties =
 {
     GX_STRING_ID_STRING_2,                   /* string id                      */
     GX_FONT_ID_PROMPT,                       /* font id                        */
     GX_COLOR_ID_TEXT,                        /* normal text color              */
-    GX_COLOR_ID_SELECTED_TEXT                /* selected text color            */
+    GX_COLOR_ID_TEXT                         /* selected text color            */
 };
 
 GX_CONST GX_STUDIO_WIDGET window1_setpoint_value_define =

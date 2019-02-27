@@ -7,22 +7,42 @@ static void sensors_thread_func(ULONG thread_input);
 static uint8_t sensors_thread_stack[1024] BSP_PLACE_IN_SECTION_V2(".stack.sensors_thread") BSP_ALIGN_VARIABLE_V2(BSP_STACK_ALIGNMENT);
 void tx_startup_err_callback(void *p_instance, void *p_data);
 void tx_startup_common_init(void);
-#if (5) != BSP_IRQ_DISABLED
+#if (6) != BSP_IRQ_DISABLED
+#if !defined(SSP_SUPPRESS_ISR_g_timer0) && !defined(SSP_SUPPRESS_ISR_GPT0)
+SSP_VECTOR_DEFINE_CHAN(gpt_counter_overflow_isr, GPT, COUNTER_OVERFLOW, 0);
+#endif
+#endif
+static gpt_instance_ctrl_t g_timer0_ctrl;
+static const timer_on_gpt_cfg_t g_timer0_extend =
+{ .gtioca =
+{ .output_enabled = false, .stop_level = GPT_PIN_LEVEL_LOW },
+  .gtiocb =
+  { .output_enabled = false, .stop_level = GPT_PIN_LEVEL_LOW } };
+static const timer_cfg_t g_timer0_cfg =
+{ .mode = TIMER_MODE_PERIODIC, .period = 100, .unit = TIMER_UNIT_PERIOD_USEC, .duty_cycle = 50, .duty_cycle_unit =
+          TIMER_PWM_UNIT_RAW_COUNTS,
+  .channel = 0, .autostart = true, .p_callback = g_timer0_interrupt, .p_context = &g_timer0, .p_extend =
+          &g_timer0_extend,
+  .irq_ipl = (6), };
+/* Instance structure to use this module. */
+const timer_instance_t g_timer0 =
+{ .p_ctrl = &g_timer0_ctrl, .p_cfg = &g_timer0_cfg, .p_api = &g_timer_on_gpt };
+#if (0) != BSP_IRQ_DISABLED
 #if !defined(SSP_SUPPRESS_ISR_g_external_irq5) && !defined(SSP_SUPPRESS_ISR_ICU5)
-SSP_VECTOR_DEFINE( icu_irq_isr, ICU, IRQ5);
+SSP_VECTOR_DEFINE(icu_irq_isr, ICU, IRQ5);
 #endif
 #endif
 static icu_instance_ctrl_t g_external_irq5_ctrl;
 static const external_irq_cfg_t g_external_irq5_cfg =
 { .channel = 5,
-  .trigger = EXTERNAL_IRQ_TRIG_RISING,
+  .trigger = EXTERNAL_IRQ_TRIG_FALLING,
   .filter_enable = true,
   .pclk_div = EXTERNAL_IRQ_PCLK_DIV_BY_64,
   .autostart = true,
   .p_callback = irq_410_callback,
   .p_context = &g_external_irq5,
   .p_extend = NULL,
-  .irq_ipl = (5), };
+  .irq_ipl = (0), };
 /* Instance structure to use this module. */
 const external_irq_instance_t g_external_irq5 =
 { .p_ctrl = &g_external_irq5_ctrl, .p_cfg = &g_external_irq5_cfg, .p_api = &g_external_irq_on_icu };

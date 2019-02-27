@@ -8,10 +8,10 @@
 #define APP_TIMER_PERIOD    (30)
 
 
-ULONG my_rcv_message[4] = {0x00, 0x00, 0x00, 0x00};
+uint32_t my_rcv_message[4] = {0x00, 0x00, 0x00};
 
 
-static void update_counter(GX_WIDGET * p_widget, GX_RESOURCE_ID id, GX_RESOURCE_ID dutc);
+static void update_counter(GX_WIDGET *p_widget);
 
 
 UINT window1_handler(GX_WINDOW *widget, GX_EVENT *event_ptr)
@@ -29,7 +29,7 @@ UINT window1_handler(GX_WINDOW *widget, GX_EVENT *event_ptr)
     case GX_EVENT_TIMER:
         if (APP_TIMER_ID == event_ptr->gx_event_payload.gx_event_timer_id)
         {
-            update_counter(widget->gx_widget_parent, ID_SETPOINT_VALUE, ID_DUTY_VALUE);
+            update_counter(widget->gx_widget_parent);
         }
     break;
     }
@@ -38,16 +38,26 @@ UINT window1_handler(GX_WINDOW *widget, GX_EVENT *event_ptr)
 }
 
 
-static void update_counter(GX_WIDGET * p_widget, GX_RESOURCE_ID setp, GX_RESOURCE_ID dutc)
+static void update_counter(GX_WIDGET *p_widget)
 {
-
-    GX_PROMPT * p_prompt = NULL;
-
+    static GX_CHAR speed_buffer[5];
     static GX_CHAR txt_buffer[5];
     static GX_CHAR dut_buffer[4];
-    static GX_CHAR speed_buffer[5];
 
-    ssp_err_t err = gx_widget_find(p_widget, ID_SETPOINT_VALUE, GX_SEARCH_DEPTH_INFINITE, (GX_WIDGET**)&p_prompt);
+    GX_PROMPT *p_prompt = NULL;
+    ssp_err_t err = 0;
+
+    err = gx_widget_find(p_widget, ID_SPEED_VALUE, GX_SEARCH_DEPTH_INFINITE, (GX_WIDGET**)&p_prompt);
+    if (TX_SUCCESS == err)
+    {
+        gx_utility_ltoa((LONG) my_rcv_message[0], speed_buffer, 5);
+
+        err = gx_prompt_text_set(p_prompt, speed_buffer);
+        if (err)
+            while (1);
+    }
+
+    err = gx_widget_find(p_widget, ID_SETPOINT_VALUE, GX_SEARCH_DEPTH_INFINITE, (GX_WIDGET**)&p_prompt);
     if (TX_SUCCESS == err)
     {
         gx_utility_ltoa((LONG) my_rcv_message[1], txt_buffer, 5);
@@ -63,16 +73,6 @@ static void update_counter(GX_WIDGET * p_widget, GX_RESOURCE_ID setp, GX_RESOURC
         gx_utility_ltoa((LONG) my_rcv_message[2], dut_buffer, 4);
 
         err = gx_prompt_text_set(p_prompt, dut_buffer);
-        if (err)
-            while (1);
-    }
-
-    err = gx_widget_find(p_widget, ID_SPEED_VALUE, GX_SEARCH_DEPTH_INFINITE, (GX_WIDGET**)&p_prompt);
-    if (TX_SUCCESS == err)
-    {
-        gx_utility_ltoa((LONG) my_rcv_message[0], speed_buffer, 5);
-
-        err = gx_prompt_text_set(p_prompt, speed_buffer);
         if (err)
             while (1);
     }
