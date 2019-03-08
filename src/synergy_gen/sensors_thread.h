@@ -20,6 +20,11 @@ extern "C"
 {
 #endif
 /** Timer on GPT Instance. */
+extern const timer_instance_t g_timer1;
+#ifndef g_timer1_interrupt
+void g_timer1_interrupt(timer_callback_args_t *p_args);
+#endif
+/** Timer on GPT Instance. */
 extern const timer_instance_t g_timer0;
 #ifndef g_timer0_interrupt
 void g_timer0_interrupt(timer_callback_args_t *p_args);

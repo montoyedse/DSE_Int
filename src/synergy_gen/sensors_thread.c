@@ -8,6 +8,26 @@ static uint8_t sensors_thread_stack[1024] BSP_PLACE_IN_SECTION_V2(".stack.sensor
 void tx_startup_err_callback(void *p_instance, void *p_data);
 void tx_startup_common_init(void);
 #if (6) != BSP_IRQ_DISABLED
+#if !defined(SSP_SUPPRESS_ISR_g_timer1) && !defined(SSP_SUPPRESS_ISR_GPT1)
+SSP_VECTOR_DEFINE_CHAN(gpt_counter_overflow_isr, GPT, COUNTER_OVERFLOW, 1);
+#endif
+#endif
+static gpt_instance_ctrl_t g_timer1_ctrl;
+static const timer_on_gpt_cfg_t g_timer1_extend =
+{ .gtioca =
+{ .output_enabled = false, .stop_level = GPT_PIN_LEVEL_LOW },
+  .gtiocb =
+  { .output_enabled = false, .stop_level = GPT_PIN_LEVEL_LOW } };
+static const timer_cfg_t g_timer1_cfg =
+{ .mode = TIMER_MODE_PERIODIC, .period = 150, .unit = TIMER_UNIT_PERIOD_MSEC, .duty_cycle = 50, .duty_cycle_unit =
+          TIMER_PWM_UNIT_RAW_COUNTS,
+  .channel = 1, .autostart = true, .p_callback = g_timer1_interrupt, .p_context = &g_timer1, .p_extend =
+          &g_timer1_extend,
+  .irq_ipl = (6), };
+/* Instance structure to use this module. */
+const timer_instance_t g_timer1 =
+{ .p_ctrl = &g_timer1_ctrl, .p_cfg = &g_timer1_cfg, .p_api = &g_timer_on_gpt };
+#if (6) != BSP_IRQ_DISABLED
 #if !defined(SSP_SUPPRESS_ISR_g_timer0) && !defined(SSP_SUPPRESS_ISR_GPT0)
 SSP_VECTOR_DEFINE_CHAN(gpt_counter_overflow_isr, GPT, COUNTER_OVERFLOW, 0);
 #endif
@@ -135,7 +155,7 @@ void sensors_thread_create(void)
 
     UINT err;
     err = tx_thread_create (&sensors_thread, (CHAR *) "Sensors Thread", sensors_thread_func, (ULONG) NULL,
-                            &sensors_thread_stack, 1024, 5, 5, 10, TX_AUTO_START);
+                            &sensors_thread_stack, 1024, 5, 5, 20, TX_AUTO_START);
     if (TX_SUCCESS != err)
     {
         tx_startup_err_callback (&sensors_thread, 0);
