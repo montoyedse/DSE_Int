@@ -3,9 +3,10 @@
 
 #define PERIOD_INT_1    (15)
 #define KP              (350)
-#define KI              (60)
-#define KD              (30)
+#define KI              (175)
+#define KD              (175)
 #define SATURATION      (100000)
+
 
 uint16_t counter_prom = 0;
 uint16_t u16adc0_data = 0;
@@ -16,7 +17,8 @@ uint32_t ui32actual_time = 0;
 uint32_t sample_time = 0;
 uint32_t ui32past_time = 0;
 uint32_t ui32elapsed_time = 0;
-uint32_t ui32vel_rpm = 0;
+volatile uint32_t ui32vel_rpm = 0;
+volatile uint32_t ui32old_vel_rpm = 0;
 uint32_t ui32vel_rpm_prom = 0;
 uint32_t ui32vel_rpm_arr[35];
 uint32_t u32ciclo_trabajo = 0;
@@ -27,7 +29,6 @@ int32_t prev_error = 0;
 int32_t P = 0;
 int32_t D = 0;
 int32_t I = 0;
-//volatile bool completed = false;
 
 
 /* Sensors Thread entry function */
@@ -55,33 +56,11 @@ void sensors_thread_entry(void)
 
     while (1)
     {
-//        if (completed)
-//        {
+        my_message[0] = ui32vel_rpm;
+        my_message[1] = u32Set_Point;
+        my_message[2] = u32ciclo_trabajo;
 
-//            for (contador = 0; contador < counter_prom; contador ++)
-//            {
-//                ui32vel_rpm_prom = ui32vel_rpm_prom + ui32vel_rpm_arr[contador];
-//            }
-//
-//            ui32vel_rpm_prom = ui32vel_rpm_prom / counter_prom;
-
-//            act_error = (float)u32Set_Point - (float)ui32vel_rpm_prom;
-
-            my_message[0] = ui32vel_rpm;
-            my_message[1] = u32Set_Point;
-            my_message[2] = u32ciclo_trabajo;
-
-//            ui32vel_rpm = 0;
-
-//            ui32vel_rpm_prom = 0;
-
-            tx_queue_send(&g_values_queue, my_message, TX_NO_WAIT);
-
-//            counter_prom = 0;
-//            completed = false;
-//        }
-//        else
-//        {}
+        tx_queue_send(&g_values_queue, my_message, TX_NO_WAIT);
 
         tx_thread_sleep(5);
     }
@@ -91,6 +70,7 @@ void sensors_thread_entry(void)
 void irq_410_callback(external_irq_callback_args_t *p_args)
 {
     (void) p_args;
+    ui32old_vel_rpm = ui32vel_rpm;
 
     ui32actual_time = time_counter;
 
@@ -104,9 +84,13 @@ void irq_410_callback(external_irq_callback_args_t *p_args)
     }
 
     ui32past_time = ui32actual_time;
+
     ui32vel_rpm = 150000 / ui32elapsed_time;
+
     if (ui32vel_rpm > 3200)
-        ui32vel_rpm = 3200;
+        ui32vel_rpm = ui32old_vel_rpm;
+    else
+    {}
 }
 
 
