@@ -8,34 +8,28 @@
 #define SATURATION      (100000)
 
 
-uint16_t counter_prom = 0;
-uint16_t u16adc0_data = 0;
-uint32_t u32Set_Point = 0;
-int32_t ui32pwm0_dc = 0;
-uint32_t ui32pwm0x1000 = 0;
-uint32_t ui32actual_time = 0;
-uint32_t sample_time = 0;
-uint32_t ui32past_time = 0;
-uint32_t ui32elapsed_time = 0;
 volatile uint32_t ui32vel_rpm = 0;
 volatile uint32_t ui32old_vel_rpm = 0;
-uint32_t ui32vel_rpm_prom = 0;
-uint32_t ui32vel_rpm_arr[35];
-uint32_t u32ciclo_trabajo = 0;
 uint32_t my_message[4] = {0x00, 0x00, 0x00};
+uint32_t ui32pwm0x1000 = 0;
+uint32_t ui32actual_time = 0;
+uint32_t ui32past_time = 0;
+uint32_t ui32elapsed_time = 0;
+uint32_t u32ciclo_trabajo = 0;
+uint32_t u32Set_Point = 0;
 uint32_t time_counter = 0;
+int32_t ui32pwm0_dc = 0;
 int32_t act_error = 0;
 int32_t prev_error = 0;
 int32_t P = 0;
 int32_t D = 0;
 int32_t I = 0;
+uint16_t u16adc0_data = 0;
 
 
 /* Sensors Thread entry function */
 void sensors_thread_entry(void)
 {
-//    uint8_t contador = 0;
-
     g_adc0.p_api->open(g_adc0.p_ctrl, g_adc0.p_cfg);
     g_adc0.p_api->scanCfg(g_adc0.p_ctrl, g_adc0.p_channel_cfg);
     g_adc0.p_api->scanStart(g_adc0.p_ctrl);

@@ -15,7 +15,6 @@
     Private function prototypes
  ***********************************************************************************************************************/
 void main_thread_entry(void);
-static bool ssp_touch_to_guix(sf_touch_panel_payload_t * p_touch_payload, GX_EVENT * g_gx_event);
 
 #if defined(BSP_BOARD_S7G2_SK)
 void g_lcd_spi_callback(spi_callback_args_t * p_args);
@@ -25,14 +24,13 @@ void g_lcd_spi_callback(spi_callback_args_t * p_args);
 /***********************************************************************************************************************
     Private global variables
  ***********************************************************************************************************************/
-static GX_EVENT g_gx_event;
 GX_WINDOW_ROOT * p_window_root;
 
 
 /***********************************************************************************************************************
     User generated variables
  ***********************************************************************************************************************/
-GX_CONST GX_CHAR *sw_version = "16";
+GX_CONST GX_CHAR *sw_version = "20";
 GX_CONST GX_CHAR *hw_version = "1";
 GX_CONST GX_CHAR *programmer1 = "De Jesus, Lloen";
 GX_CONST GX_CHAR *programmer2 = "Alvarado, Jorge";
@@ -169,93 +167,16 @@ void main_thread_entry(void)
     }
 #endif
 
+    err = g_sf_message0.p_api->pend(g_sf_message0.p_ctrl, &main_thread_message_queue, (sf_message_header_t **) &p_message, TX_WAIT_FOREVER);
+    if (err)
+    {
+        while(1);
+    }
+
 	while(1)
 	{
-	    bool new_gui_event = false;
-
-        err = g_sf_message0.p_api->pend(g_sf_message0.p_ctrl, &main_thread_message_queue, (sf_message_header_t **) &p_message, TX_WAIT_FOREVER);
-        if (err)
-        {
-            while(1);
-        }
-
-        switch (p_message->event_b.class_code)
-        {
-        case SF_MESSAGE_EVENT_CLASS_TOUCH:
-        {
-            switch (p_message->event_b.code)
-            {
-            case SF_MESSAGE_EVENT_NEW_DATA:
-            {
-                /** Translate an SSP touch event into a GUIX event */
-                new_gui_event = ssp_touch_to_guix((sf_touch_panel_payload_t*)p_message, &g_gx_event);
-            }
-            default:
-                break;
-            }
-            break;
-        }
-        default:
-            break;
-        }
-
-        /** Message is processed, so release buffer. */
-        err = g_sf_message0.p_api->bufferRelease(g_sf_message0.p_ctrl, (sf_message_header_t *) p_message, SF_MESSAGE_RELEASE_OPTION_FORCED_RELEASE);
-
-        if (err)
-        {
-            while(1);
-        }
-
-        /** Post message. */
-        if (new_gui_event) {
-            gx_system_event_send(&g_gx_event);
-        }
 
 	}
-}
-
-
-static bool ssp_touch_to_guix(sf_touch_panel_payload_t * p_touch_payload, GX_EVENT * gx_event)
-{
-    bool send_event = true;
-
-    switch (p_touch_payload->event_type)
-    {
-    case SF_TOUCH_PANEL_EVENT_DOWN:
-        gx_event->gx_event_type = GX_EVENT_PEN_DOWN;
-        break;
-    case SF_TOUCH_PANEL_EVENT_UP:
-        gx_event->gx_event_type = GX_EVENT_PEN_UP;
-        break;
-    case SF_TOUCH_PANEL_EVENT_HOLD:
-    case SF_TOUCH_PANEL_EVENT_MOVE:
-        gx_event->gx_event_type = GX_EVENT_PEN_DRAG;
-        break;
-    case SF_TOUCH_PANEL_EVENT_INVALID:
-        send_event = false;
-        break;
-    default:
-        break;
-    }
-
-    if (send_event)
-    {
-        /** Send event to GUI */
-        gx_event->gx_event_sender = GX_ID_NONE;
-        gx_event->gx_event_target = 0;
-        gx_event->gx_event_display_handle = 0;
-
-        gx_event->gx_event_payload.gx_event_pointdata.gx_point_x = p_touch_payload->x;
-
-#if defined(BSP_BOARD_S7G2_SK)
-        gx_event->gx_event_payload.gx_event_pointdata.gx_point_y = (GX_VALUE)(320 - p_touch_payload->y);  // SK-S7G2
-#else
-        gx_event->gx_event_payload.gx_event_pointdata.gx_point_y = p_touch_payload->y;  // DK-S7G2, PE-HMI1
-#endif
-    }
-
-    return send_event;
 }
 
 
