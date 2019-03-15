@@ -692,7 +692,7 @@
       <property id="rtos.threadx.thread.name" value="Main Thread"/>
       <property id="rtos.threadx.thread.stack" value="2048"/>
       <property id="rtos.threadx.thread.priority" value="6"/>
-      <property id="rtos.threadx.thread.autostart" value="rtos.threadx.thread.autostart.enabled"/>
+      <property id="rtos.threadx.thread.autostart" value="rtos.threadx.thread.autostart.disabled"/>
       <property id="rtos.threadx.thread.timeslice" value="10"/>
       <stack module="module.framework.sf_touch_panel_on_sf_touch_panel_i2c.1280259427">
         <stack module="module.framework.sf_message.1195388849" requires="module.framework.sf_touch_panel_on_sf_touch_panel_i2c.requires.sf_message"/>
@@ -730,7 +730,7 @@
       <property id="rtos.threadx.thread.name" value="Sensors Thread"/>
       <property id="rtos.threadx.thread.stack" value="1024"/>
       <property id="rtos.threadx.thread.priority" value="5"/>
-      <property id="rtos.threadx.thread.autostart" value="rtos.threadx.thread.autostart.enabled"/>
+      <property id="rtos.threadx.thread.autostart" value="rtos.threadx.thread.autostart.disabled"/>
       <property id="rtos.threadx.thread.timeslice" value="20"/>
       <stack module="module.driver.adc_on_adc.1349693378"/>
       <stack module="module.driver.timer_on_gpt.1047931244"/>
@@ -743,6 +743,22 @@
         <property id="rtos.threadx.object.queue.msg_size" value="4"/>
         <property id="rtos.threadx.object.queue.queue_size" value="16"/>
       </object>
+    </context>
+    <context id="rtos.threadx.thread.1071890043">
+      <property id="_symbol" value="cpu_load_counter_thread"/>
+      <property id="rtos.threadx.thread.name" value="CPU Load Counter Thread"/>
+      <property id="rtos.threadx.thread.stack" value="1024"/>
+      <property id="rtos.threadx.thread.priority" value="30"/>
+      <property id="rtos.threadx.thread.autostart" value="rtos.threadx.thread.autostart.enabled"/>
+      <property id="rtos.threadx.thread.timeslice" value="1"/>
+    </context>
+    <context id="rtos.threadx.thread.970351836">
+      <property id="_symbol" value="cpu_load_thread"/>
+      <property id="rtos.threadx.thread.name" value="CPU Load Thread"/>
+      <property id="rtos.threadx.thread.stack" value="1024"/>
+      <property id="rtos.threadx.thread.priority" value="1"/>
+      <property id="rtos.threadx.thread.autostart" value="rtos.threadx.thread.autostart.enabled"/>
+      <property id="rtos.threadx.thread.timeslice" value="1"/>
     </context>
     <config id="config.driver.jpeg_decode">
       <property id="config.driver.jpeg_decode.param_checking_enable" value="config.driver.jpeg_decode.param_checking_enable.bsp"/>
