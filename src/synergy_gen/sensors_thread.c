@@ -155,7 +155,7 @@ void sensors_thread_create(void)
 
     UINT err;
     err = tx_thread_create (&sensors_thread, (CHAR *) "Sensors Thread", sensors_thread_func, (ULONG) NULL,
-                            &sensors_thread_stack, 1024, 5, 5, 20, TX_AUTO_START);
+                            &sensors_thread_stack, 1024, 5, 5, 20, TX_DONT_START);
     if (TX_SUCCESS != err)
     {
         tx_startup_err_callback (&sensors_thread, 0);
